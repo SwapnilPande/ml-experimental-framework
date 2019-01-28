@@ -1,0 +1,48 @@
+{
+    "ml_framework" : "keras",
+    "label" : "test_experiment",
+    "experiment_type" : "static_simple",
+
+    "models" : 
+    [
+        {
+            "label" : "model1",
+            "path" : "model1"
+        },
+        {
+            "label" : "model2",
+            "path" : "model2"
+        }
+    ],
+    "hyperparameter_sets":
+    [
+        {
+            "label" : "hp1",
+            "hyperparameters" : 
+            {
+                "hp1" : 0.01,
+                "hp2" : 0.02
+            }
+        },
+        {
+            "label" : "hp2",
+            "hyperparameters" : 
+            {
+                "hp1" : 0.21,
+                "hp2" : 0.22
+            }
+        }
+    ],
+    "datasets":
+    [
+        {
+            "label" : "ds1",
+            "path" : "dataset1"
+        },
+        {
+            "label" : "ds2",
+            "path" : "dataset2"
+        }
+    ]
+
+}

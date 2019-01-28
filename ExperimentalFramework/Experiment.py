@@ -19,6 +19,7 @@ class ExperimentInstance():
         self.dataset = dataset
         self.model = model
         self.hyperparameters = hyperparameters
+        self.instanceIdx = instanceIdx
 
         self.label = "Experiment Instance: %(instanceIdx)s\nModel: %(modelLbl)s\nHyperparameterSet: %(hpLbl)s\nDataset: %(datasetLbl)s" % {
             "instanceIdx" : instanceIdx,
@@ -51,7 +52,7 @@ class StaticExperiment():
 
     def __init__(self, mlFramework, models = [], hyperparameterSets = [], datasets = []):
         #Defining parameters here
-        self.framework = mlFramework
+        self.mlFramework = mlFramework
         self.models = models
         self.hyperparameterSets = hyperparameterSets
         self.datasets = datasets
@@ -86,7 +87,7 @@ class SimpleStaticExperiment(StaticExperiment):
 
 
         def __init__(self, mlFramework, models = [], hyperparameterSets = [], datasets = []):
-            super().__init__(mlFramework, datasets, models, hyperparameterSets)
+            super().__init__(mlFramework, models,  hyperparameterSets, datasets)
 
         
         def __len__(self):
@@ -106,25 +107,25 @@ class SimpleStaticExperiment(StaticExperiment):
 
                 modelIdx = tempIdx%len(self.models)
                 
-                return ExperimentInstance("keras",
+                return ExperimentInstance(self.mlFramework,
                     index,
-                    self.models[modelIdx],
-                    self.hyperparameterSets[hyperparameterSetIdx],
-                    self.datasets[datasetIdx],
-                    modelIdx,
-                    hyperparameterSetIdx,
-                    datasetIdx,
+                    self.models[modelIdx]["path"],
+                    self.hyperparameterSets[hyperparameterSetIdx]["hyperparameters"],
+                    self.datasets[datasetIdx]["path"],
+                    self.models[modelIdx]["label"],
+                    self.hyperparameterSets[hyperparameterSetIdx]["label"],
+                    self.datasets[datasetIdx]["label"],
                 )
 
             
+if __name__ == "__main__":
+    exp = SimpleStaticExperiment('kera', [0,1],[0,1],[0,1])
 
-exp = SimpleStaticExperiment('kera', [0,1],[0,1],[0,1])
+    instances = exp.getExperimentInstances()
 
-instances = exp.getExperimentInstances()
-
-for instance in instances:
-    print(instance)
-    print('\n')
+    for instance in instances:
+        print(instance)
+        print('\n')
 
 
 
