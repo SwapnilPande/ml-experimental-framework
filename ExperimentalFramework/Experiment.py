@@ -12,7 +12,7 @@ from abc import ABC, abstractmethod
 # The ExperimentInstance object will be converted into a training program by the specific plugin for the ML Framework
 class ExperimentInstance():
 
-    def __init__(self, mlFramework, instanceIdx, model, hyperparameters, dataset, modelLabel, hyperparametersLabel, datasetLabel):
+    def __init__(self, mlFramework, instanceIdx, model, hyperparameters, dataset, optimizer, modelLabel, hyperparametersLabel, datasetLabel, optimizerLabel):
 
         #Storing data as instance variables
         self.mlFramework = mlFramework
@@ -21,11 +21,12 @@ class ExperimentInstance():
         self.hyperparameters = hyperparameters
         self.instanceIdx = instanceIdx
 
-        self.label = "Experiment Instance: %(instanceIdx)s\nModel: %(modelLbl)s\nHyperparameterSet: %(hpLbl)s\nDataset: %(datasetLbl)s" % {
+        self.label = "Experiment Instance: %(instanceIdx)s\nModel: %(modelLbl)s\nOptimizer: %(optimizerLbl)s\nHyperparameterSet: %(hpLbl)s\nDataset: %(datasetLbl)s\n" % {
             "instanceIdx" : instanceIdx,
             "modelLbl": str(modelLabel),
             "hpLbl" : str(hyperparametersLabel),
-            "datasetLbl" : str(datasetLabel)
+            "datasetLbl" : str(datasetLabel),
+            "optimizerLbl" : str(optimizerLabel)
         }
 
 
@@ -50,12 +51,13 @@ class ExperimentInstance():
 
 class StaticExperiment():
 
-    def __init__(self, mlFramework, models = [], hyperparameterSets = [], datasets = []):
+    def __init__(self, mlFramework, models = {}, hyperparameterSets = {}, datasets = {}, optimizers = {}):
         #Defining parameters here
         self.mlFramework = mlFramework
         self.models = models
         self.hyperparameterSets = hyperparameterSets
         self.datasets = datasets
+        self.optimizers = optimizers
 
     @abstractmethod
     def __getitem__(self, index):
@@ -82,16 +84,16 @@ class StaticExperiment():
 ## SimpleStaticExperiment 
 # The SimpleStaticExperiment is a simple example of an implementation of the StaticExperiment.
 # The various models, hyperparameters, and datasets are passed when the SimpleStaticExperiment is instantiated.
-# The __getitem__ method will simply return every combination of the 3 independent variables to be executed.
+# The __getitem__ method will simply return every combination of the 4 independent variables to be executed.
 class SimpleStaticExperiment(StaticExperiment):
 
 
-        def __init__(self, mlFramework, models = [], hyperparameterSets = [], datasets = []):
-            super().__init__(mlFramework, models,  hyperparameterSets, datasets)
+        def __init__(self, mlFramework, models = {}, hyperparameterSets = {}, datasets = {}, optimizers = {}):
+            super().__init__(mlFramework, models,  hyperparameterSets, datasets, optimizers)
 
         
         def __len__(self):
-            return len(self.datasets)*len(self.models)*len(self.hyperparameterSets)
+            return len(self.datasets)*len(self.models)*len(self.hyperparameterSets)*len(self.optimizers)
         
         def __getitem__(self, index):
             if(index >= len(self)):
@@ -99,11 +101,15 @@ class SimpleStaticExperiment(StaticExperiment):
                 raise Exception()
             else:
                 tempIdx = index
+
                 datasetIdx = tempIdx%len(self.datasets)
                 tempIdx = int(tempIdx/len(self.datasets))
 
                 hyperparameterSetIdx = tempIdx%len(self.hyperparameterSets)
                 tempIdx = int(tempIdx/len(self.hyperparameterSets))
+
+                optimizerIdx = tempIdx%len(self.optimizers)
+                tempIdx = int(tempIdx/len(self.optimizers))
 
                 modelIdx = tempIdx%len(self.models)
                 
@@ -112,9 +118,11 @@ class SimpleStaticExperiment(StaticExperiment):
                     self.models[modelIdx]["path"],
                     self.hyperparameterSets[hyperparameterSetIdx]["hyperparameters"],
                     self.datasets[datasetIdx]["path"],
+                    self.optimizers[optimizerIdx]["optimizer"],
                     self.models[modelIdx]["label"],
                     self.hyperparameterSets[hyperparameterSetIdx]["label"],
                     self.datasets[datasetIdx]["label"],
+                     self.optimizers[optimizerIdx]["label"]
                 )
 
             
