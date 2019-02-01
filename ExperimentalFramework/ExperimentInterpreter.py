@@ -17,7 +17,7 @@ class ExperimentInterpreter:
         self.hyperparameterSets = self.expConfig["hyperparameter_sets"]
         self.datasets = self.expConfig["datasets"]
         self.optimizers = self.expConfig["optimizers"]
-            
+
         # Imports the necessary ML framework plugin as defined in config
         self.pluginName = self.mlFwk + "_plugin"
         self.mlFwkPlugin = __import__(self.pluginName)
@@ -30,15 +30,11 @@ class ExperimentInterpreter:
             self.instances = self.experiment.getExperimentInstances()
             for instance in self.instances:
                 print(instance)
-        
+
     def generateTrainingFiles(self):
         self.mlFwkPlugin.generateTrainingFiles(self.expLabel, self.instances)
-        
 
 
-        
-
-        
 if(__name__ == "__main__"):
     expInterpret = ExperimentInterpreter("sampleconfig.json")
     expInterpret.generateTrainingFiles()

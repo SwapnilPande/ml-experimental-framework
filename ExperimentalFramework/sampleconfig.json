@@ -3,7 +3,7 @@
     "label" : "test_experiment",
     "experiment_type" : "static_simple",
 
-    "models" : 
+    "models" :
     [
         {
             "label" : "m1",
@@ -18,7 +18,7 @@
     [
         {
             "label" : "hp1",
-            "hyperparameters" : 
+            "hyperparameters" :
             {
                 "epochs" : 5
             }
@@ -35,7 +35,7 @@
             "path" : "dataset2"
         }
     ],
-    "optimizers" : 
+    "optimizers" :
     [
         {
             "label" : "sgd1",
