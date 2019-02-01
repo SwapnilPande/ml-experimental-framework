@@ -7,11 +7,19 @@
     [
         {
             "label" : "m1",
-            "path" : "model1"
+            "path" : "model1",
+            "model_parameters" : {
+                "loss" : "mse",
+                "metrics" : "accuracy"
+            }
         },
         {
             "label" : "model2",
-            "path" : "model2"
+            "path" : "model2",
+            "model_parameters" : {
+                "loss" : "mse",
+                "metrics" : "accuracy"
+            }
         }
     ],
     "hyperparameter_sets":

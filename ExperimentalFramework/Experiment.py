@@ -116,9 +116,9 @@ class SimpleStaticExperiment(StaticExperiment):
 
                 return ExperimentInstance(self.mlFramework,
                     index,
-                    self.models[modelIdx]["path"],
+                    self.models[modelIdx],
                     self.hyperparameterSets[hyperparameterSetIdx]["hyperparameters"],
-                    self.datasets[datasetIdx]["path"],
+                    self.datasets[datasetIdx],
                     self.optimizers[optimizerIdx]["optimizer"],
                     self.models[modelIdx]["label"],
                     self.hyperparameterSets[hyperparameterSetIdx]["label"],
