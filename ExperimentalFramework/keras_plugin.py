@@ -21,6 +21,7 @@ def optimizer(expInstance):
         "type" : expInstance.optimizer["type"],
         "args" : argString
     }
+    return outStr
 
 def generateTrainingFiles(label, expInstances):
     os.mkdir(label)
