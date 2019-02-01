@@ -4,9 +4,9 @@ import Experiment
 # Returns the strings to write to import necessary packages
 def imports(expInstance):
     outStr = "# Imports"
-    outStr += "from keras.models import Model\n" 
-    #Import the correct optimizer for this model 
-    outStr += "from keras.optimizers import %(type)s\n" % {"type" : expInstance.optimizer["type"]} 
+    outStr += "from keras.models import Model\n"
+    #Import the correct optimizer for this model
+    outStr += "from keras.optimizers import %(type)s\n" % {"type" : expInstance.optimizer["type"]}
     outStr += "import " + expInstance.model + "\n\n"
     return outStr
 
@@ -21,7 +21,6 @@ def optimizer(expInstance):
         "type" : expInstance.optimizer["type"],
         "args" : argString
     }
-    return outStr
 
 def generateTrainingFiles(label, expInstances):
     os.mkdir(label)
@@ -34,6 +33,3 @@ def generateTrainingFiles(label, expInstances):
             # Writes import statements to file
             f.write(imports(instance))
             f.write(optimizer(instance))
-
-
-
