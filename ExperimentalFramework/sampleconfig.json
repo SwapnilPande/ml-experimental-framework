@@ -40,12 +40,12 @@
         {
             "label" : "sgd1",
             "optimizer" : {
-                "optimizer" : "sgd",
+                "type" : "SGD",
                 "optimizer_parameters" :
                 {
                     "lr" : 0.01,
                     "momentum" : 0.9,
-                    "Decay" : 0.01
+                    "decay" : 0.01
                 }
             }
         }
