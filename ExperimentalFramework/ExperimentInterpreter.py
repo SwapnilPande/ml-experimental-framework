@@ -20,7 +20,10 @@ class ExperimentInterpreter:
 
         # Imports the necessary ML framework plugin as defined in config
         self.pluginName = self.mlFwk + "_plugin"
-        self.mlFwkPlugin = __import__(self.pluginName)
+        self.mlFwkPluginImport = __import__(self.pluginName)
+
+        #Initialize the plugin object from the ML Framework file
+        self.mlFwkPlugin = self.mlFwkPluginImport.plugin()
 
         print("Debug - Machine Learning Framework : " + self.expConfig["ml_framework"])
 
@@ -30,6 +33,7 @@ class ExperimentInterpreter:
             self.instances = self.experiment.getExperimentInstances()
             for instance in self.instances:
                 print(instance)
+
 
     def generateTrainingFiles(self):
         self.mlFwkPlugin.generateTrainingFiles(self.expLabel, self.instances)
