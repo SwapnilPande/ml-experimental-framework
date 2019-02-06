@@ -1,9 +1,10 @@
 import json
 import Experiment
+import os
 
 class ExperimentInterpreter:
 
-    def __init__(self, expConfigFilepath):
+    def __init__(self, expConfigFilepath, artifactDir):
         # Open and read in JSON file as dictionary
         self.expConfigFilepath = expConfigFilepath
         with open(expConfigFilepath) as f:
@@ -34,11 +35,21 @@ class ExperimentInterpreter:
             for instance in self.instances:
                 print(instance)
 
+        self.artifactDir = (artifactDir + "/{label}").format(label = self.expLabel)
+        self.experimentDir = self.artifactDir + "/instance_{instanceIdx}/"
+        print(self.experimentDir)
+
+    def initializeExpDirs(self):
+        os.mkdir(self.artifactDir)
+        for instance in self.instances:
+            os.mkdir(self.experimentDir.format(instanceIdx = instance.instanceIdx))
+
 
     def generateTrainingFiles(self):
-        self.mlFwkPlugin.generateTrainingFiles(self.expLabel, self.instances)
+        self.mlFwkPlugin.generateTrainingFiles(self.expLabel, self.instances, self.experimentDir)
 
 
 if(__name__ == "__main__"):
-    expInterpret = ExperimentInterpreter("sampleconfig.json")
+    expInterpret = ExperimentInterpreter("sampleconfig.json","test")
+    expInterpret.initializeExpDirs()
     expInterpret.generateTrainingFiles()

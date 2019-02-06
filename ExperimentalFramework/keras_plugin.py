@@ -50,13 +50,18 @@ class plugin:
 
         return outStr
 
-    def generateTrainingFiles(self, label, expInstances):
-        os.mkdir(label)
+    def getRequirements(self):
+        return ["keras"]
+
+    def generateTrainingFiles(self, label, expInstances, instanceDir):
         for instance in expInstances:
+            # Construct full filename and path for python training file
+            filename = (instanceDir + "train-{label}s-{instanceIdx}.py").format(
+                label = label,
+                instanceIdx = instance.instanceIdx
+            )
 
-            filenameBase = label + "/" + label + "-" + str(instance.instanceIdx)
-
-            with open(filenameBase + "-train" + ".py", "w+") as f:
+            with open(filename, "w+") as f:
 
                 # Writes import statements to file
                 f.write(self.imports(instance))
