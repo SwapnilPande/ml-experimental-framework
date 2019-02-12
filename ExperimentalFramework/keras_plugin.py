@@ -61,11 +61,14 @@ class plugin:
                 instanceIdx = instance.instanceIdx
             )
 
+            # Open python training file
             with open(filename, "w+") as f:
-
                 # Writes import statements to file
                 f.write(self.imports(instance))
                 f.write(self.optimizer(instance))
                 f.write(self.preprocessor(instance))
                 f.write(self.model(instance))
                 f.write(self.fitGenerator(instance))
+
+            instance.trainfile = filename
+        return expInstances

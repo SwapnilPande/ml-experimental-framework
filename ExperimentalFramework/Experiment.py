@@ -21,6 +21,8 @@ class ExperimentInstance():
         self.hyperparameters = hyperparameters
         self.optimizer = optimizer
         self.instanceIdx = instanceIdx
+        self.trainfile = None
+        self.dockerfile = None
 
         self.label = "Experiment Instance: %(instanceIdx)s\nModel: %(modelLbl)s\nOptimizer: %(optimizerLbl)s\nHyperparameterSet: %(hpLbl)s\nDataset: %(datasetLbl)s\n" % {
             "instanceIdx" : instanceIdx,

@@ -28,7 +28,8 @@
             "label" : "hp1",
             "hyperparameters" :
             {
-                "epochs" : 5
+                "epochs" : 5,
+                "shuffle" : true
             }
         }
     ],
@@ -36,11 +37,13 @@
     [
         {
             "label" : "ds1",
-            "path" : "dataset1"
+            "path" : "dataset1",
+            "preprocessor" : "preprocesor1"
         },
         {
             "label" : "ds2",
-            "path" : "dataset2"
+            "path" : "dataset2",
+            "preprocessor" : "preprocesor2"
         }
     ],
     "optimizers" :

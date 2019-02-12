@@ -1,6 +1,7 @@
 import json
 import Experiment
 import os
+import docker_plugin
 
 class ExperimentInterpreter:
 
@@ -25,6 +26,7 @@ class ExperimentInterpreter:
 
         #Initialize the plugin object from the ML Framework file
         self.mlFwkPlugin = self.mlFwkPluginImport.plugin()
+        self.dockerPlugin = docker_plugin.DockerPlugin()
 
         print("Debug - Machine Learning Framework : " + self.expConfig["ml_framework"])
 
@@ -32,12 +34,12 @@ class ExperimentInterpreter:
         if(self.expConfig["experiment_type"] == "static_simple"):
             self.experiment = Experiment.SimpleStaticExperiment(self.mlFwk, self.models, self.hyperparameterSets, self.datasets, self.optimizers)
             self.instances = self.experiment.getExperimentInstances()
-            for instance in self.instances:
-                print(instance)
+            # for instance in self.instances:
+            #     #print(instance)
 
         self.artifactDir = (artifactDir + "/{label}").format(label = self.expLabel)
         self.experimentDir = self.artifactDir + "/instance_{instanceIdx}/"
-        print(self.experimentDir)
+       # print(self.experimentDir)
 
     def initializeExpDirs(self):
         os.mkdir(self.artifactDir)
@@ -46,10 +48,14 @@ class ExperimentInterpreter:
 
 
     def generateTrainingFiles(self):
-        self.mlFwkPlugin.generateTrainingFiles(self.expLabel, self.instances, self.experimentDir)
+        self.instances = self.mlFwkPlugin.generateTrainingFiles(self.expLabel, self.instances, self.experimentDir)
+
+    def generateDockerFiles(self):
+        self.instances = self.dockerPlugin.generateDockerFiles("kerasContainer", self.instances, self.experimentDir)
 
 
 if(__name__ == "__main__"):
     expInterpret = ExperimentInterpreter("sampleconfig.json","test")
     expInterpret.initializeExpDirs()
     expInterpret.generateTrainingFiles()
+    expInterpret.generateDockerFiles()
