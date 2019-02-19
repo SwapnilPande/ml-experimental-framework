@@ -56,7 +56,7 @@ class plugin:
     def generateTrainingFiles(self, label, expInstances, instanceDir):
         for instance in expInstances:
             # Construct full filename and path for python training file
-            filename = (instanceDir + "train-{label}s-{instanceIdx}.py").format(
+            filename = (instanceDir + "train-{label}-{instanceIdx}.py").format(
                 label = label,
                 instanceIdx = instance.instanceIdx
             )

@@ -23,6 +23,7 @@ class ExperimentInstance():
         self.instanceIdx = instanceIdx
         self.trainfile = None
         self.dockerfile = None
+        self.executeFile = None
 
         self.label = "Experiment Instance: %(instanceIdx)s\nModel: %(modelLbl)s\nOptimizer: %(optimizerLbl)s\nHyperparameterSet: %(hpLbl)s\nDataset: %(datasetLbl)s\n" % {
             "instanceIdx" : instanceIdx,
@@ -54,13 +55,18 @@ class ExperimentInstance():
 
 class StaticExperiment():
 
-    def __init__(self, mlFramework, models = {}, hyperparameterSets = {}, datasets = {}, optimizers = {}):
+    def __init__(self, mlFramework, slurmConfig, models = {}, hyperparameterSets = {}, datasets = {}, optimizers = {}):
         #Defining parameters here
         self.mlFramework = mlFramework
         self.models = models
         self.hyperparameterSets = hyperparameterSets
         self.datasets = datasets
         self.optimizers = optimizers
+
+        self.artifactDir = None
+        self.expInstanceDir = None
+
+        self.slurmConfig = slurmConfig
 
     @abstractmethod
     def __getitem__(self, index):
@@ -91,8 +97,8 @@ class StaticExperiment():
 class SimpleStaticExperiment(StaticExperiment):
 
 
-        def __init__(self, mlFramework, models = {}, hyperparameterSets = {}, datasets = {}, optimizers = {}):
-            super().__init__(mlFramework, models,  hyperparameterSets, datasets, optimizers)
+        def __init__(self, mlFramework, slurmConfig, models = {}, hyperparameterSets = {}, datasets = {}, optimizers = {}):
+            super().__init__(mlFramework, slurmConfig, models,  hyperparameterSets, datasets, optimizers)
 
 
         def __len__(self):

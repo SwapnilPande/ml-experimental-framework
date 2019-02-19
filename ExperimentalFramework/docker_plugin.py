@@ -18,18 +18,44 @@ class DockerPlugin:
         outStr = "CMD python {trainfile}".format(trainfile=file)
         return outStr
 
+    def shebang(self):
+        return "#!/bin/bash\n\n"
 
-    def generateDockerFiles(self, frameworkContainer, expInstances, instanceDir):
+    def dockerBuild(self, label, instance):
+        instanceDir,instanceName = os.path.split(instance.trainfile)
+        return "docker build --tag={label}-{instanceIdx} {instanceDir}\n\n".format(
+            label = label,
+            instanceIdx = instance.instanceIdx,
+            instanceDir = instanceDir)
+
+    def dockerRun(self, label, instance):
+        return "docker run {label}-{instanceIdx}".format(
+            label = label,
+            instanceIdx = instance.instanceIdx)
+
+    def generateDockerFiles(self, label, expInstances, instanceDir, frameworkContainer):
         for instance in expInstances:
             # Construct full filename and path for python training file
-            filename = (instanceDir + "Dockerfile").format(
+            dockerfileName = (instanceDir + "Dockerfile").format(
                 instanceIdx = instance.instanceIdx
             )
 
              # Open dockerfile
-            with open(filename, "w+") as f:
+            with open(dockerfileName, "w+") as f:
                 f.write(self.fromContainer(frameworkContainer))
                 f.write(self.installDependencies(["libsm6", "libxext6"]))
                 f.write(self.runTrainFile(instance))
-            instance.dockerfile = filename
+            instance.dockerfile = dockerfileName
+
+            executedockerfileName = (instanceDir + "run_dockerfile").format(
+                instanceIdx = instance.instanceIdx
+            )
+
+            with open(executedockerfileName, "w+") as f:
+                f.write(self.shebang())
+                f.write(self.dockerBuild(label, instance))
+                f.write(self.dockerRun(label, instance))
+            instance.executeFile = executedockerfileName
+
+
         return expInstances

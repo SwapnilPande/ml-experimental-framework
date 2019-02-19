@@ -3,6 +3,13 @@
     "label" : "test_experiment",
     "experiment_type" : "static_simple",
 
+    "resources" :
+    {
+        "cpus" : 5,
+        "memory" : 200,
+        "gpus" : 1
+    },
+
     "models" :
     [
         {
