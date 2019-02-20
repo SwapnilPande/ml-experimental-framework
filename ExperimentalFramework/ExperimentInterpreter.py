@@ -21,13 +21,6 @@ class ExperimentInterpreter:
         self.datasets = self.expConfig["datasets"]
         self.optimizers = self.expConfig["optimizers"]
 
-        self.slurmConfig = {
-            "--nodes" : 1,
-            "--ntasks" : 1,
-            "--cpus-per-task" : self.expConfig["resources"]["cpus"],
-            "--mem" : self.expConfig["resources"]["memory"],
-            "--gres" : "gpu" + str(self.expConfig["resources"]["gpus"])
-        }
 
         # Imports the necessary ML framework plugin as defined in config
         self.pluginName = self.mlFwk + "_plugin"
@@ -55,6 +48,17 @@ class ExperimentInterpreter:
 
         self.experiment.artifactDir = (artifactDir + "/{label}").format(label = self.expLabel)
         self.experiment.expInstanceDir = self.experiment.artifactDir + "/instance_{instanceIdx}/"
+        self.experiment.outputDir = self.experiment.artifactDir + "/instance_{instanceIdx}.out"
+
+
+        self.slurmConfig = {
+            "--nodes" : 1,
+            "--ntasks" : 1,
+            "--cpus-per-task" : self.expConfig["resources"]["cpus"],
+            "--mem" : self.expConfig["resources"]["memory"],
+            "--gres" : "gpu" + str(self.expConfig["resources"]["gpus"]),
+            "--output" :  self.experiment.outputDir
+        }
 
     def initializeExpDirs(self):
         os.mkdir(self.experiment.artifactDir)

@@ -11,27 +11,47 @@ from abc import ABC, abstractmethod
 # An ExperimentInstance objects contains a specific combination of the 'independent variables' of the experiment, as well as a label describing the instance
 # The ExperimentInstance object will be converted into a training program by the specific plugin for the ML Framework
 class ExperimentInstance():
-
-    def __init__(self, mlFramework, instanceIdx, model, hyperparameters, dataset, optimizer, modelLabel, hyperparametersLabel, datasetLabel, optimizerLabel):
-
-        #Storing data as instance variables
+    """
+        instanceIdx - Unique index assigned to the experiment instance. Experiment label + instanceIdx provide a unique identifier for instance
+        mlFramework - Name of machine learning framework to use, name must match plugin name exactly
+        slurmConfig - Dictionary containing the arguments to pass to SLURM when executing this instance as defined in the config JSON folder.
+                        This should not include the "--output" parameter (which will be added in the init)
+        artifactDir - Directory in which all the training artifacts are generated for the experiment instance        instanceIdx - Unique index assigned to instance. The experiment label + instance index define a unique identifier for each experiment instance
+        model - python module path containing the model associated with instance
+        hyperparameters - dictionary containing hyperparameters associated with model
+        dataset - path to dataset to train model
+        optimizer - python module path containing the optimizer associated with the instance
+        modelLabel - Human readable label assigned to the model
+        hyperparameterLabel - Human readable label assigned to the hyperparameter set
+        datasetLabel - Human readable label assigned to dataset
+        optimizerLabel - Human readable label assigned to optimizer
+    """
+    def __init__(self, instanceIdx, mlFramework, artifactDir, slurmConfig, model, hyperparameters, dataset, optimizer, modelLabel, hyperparametersLabel, datasetLabel, optimizerLabel):
+        #Storing all arguments as instance variables for the ExperimentInstance
+        self.instanceIdx = instanceIdx
         self.mlFramework = mlFramework
+        self.artifactDir = artifactDir.format(instanceIdx = instanceIdx)
         self.dataset = dataset
         self.model = model
         self.hyperparameters = hyperparameters
         self.optimizer = optimizer
-        self.instanceIdx = instanceIdx
-        self.trainfile = None
-        self.dockerfile = None
-        self.executeFile = None
+        self.slurmConfig = slurmConfig
 
-        self.label = "Experiment Instance: %(instanceIdx)s\nModel: %(modelLbl)s\nOptimizer: %(optimizerLbl)s\nHyperparameterSet: %(hpLbl)s\nDataset: %(datasetLbl)s\n" % {
-            "instanceIdx" : instanceIdx,
-            "modelLbl": str(modelLabel),
-            "hpLbl" : str(hyperparametersLabel),
-            "datasetLbl" : str(datasetLabel),
-            "optimizerLbl" : str(optimizerLabel)
-        }
+        # Variables for all files associated with experiment
+        self.trainfile = None # Python file for training the model. This field is populated by the ML Framework plugin
+        self.dockerfile = None # Dockerfile associated with instance. This field is populated by the dockerfile generator
+        self.executeFile = None # Bash script to build and run docker container. THis field is populated by the dockerfile generator
+        self.outputFile = "instance_{instanceIdx}.out".format(self.instanceIdx) # File to redirect stdout/stderr, defined relative to artifactDir
+
+        slurmConfig['--output'] = self.outputFile
+
+        # Generate combined label to describe experiment instance
+        self.label = "Experiment Instance: {instanceIdx}\nModel: {modelLbl}\nOptimizer: {optimizerLbl}\nHyperparameterSet: {hpLbl}\nDataset: {datasetLbl}\n".format(
+            instanceIdx = instanceIdx,
+            modelLbl = str(modelLabel),
+            hpLbl = str(hyperparametersLabel),
+            datasetLbl = str(datasetLabel),
+            optimizerLbl = str(optimizerLabel))
 
 
     def getModel(self):
@@ -52,21 +72,36 @@ class ExperimentInstance():
 # objects are all created at the beginning of the experiment execution, and therefore, cannot be created or changed
 # based on the results from the experimentation, hence the name static. A DynamicExperiment can be used for applications
 # such as hyperparameter search
-
 class StaticExperiment():
+    """
+        mlFramework - Name of machine learning framework to use, name must match plugin name exactly
+        slurmConfig - Dictionary containing the arguments to pass to SLURM when executing this instance as defined in the config JSON folder.
+                        This should not include the "--output" parameter (which will be added in the experimentInstance)
+        artifactDir - Directory path in which all the training artifacts are generated for the experiment
 
-    def __init__(self, mlFramework, slurmConfig, models = {}, hyperparameterSets = {}, datasets = {}, optimizers = {}):
-        #Defining parameters here
+        models - Dictionary of the models from the config json file
+        hyperparameterSets - Dictionary of the hyperparameterSets from config json file
+        datasets - Dictionary of the datsets from the config json file
+        optimizers - Dictionary of the optimizers from the config json file
+    """
+    def __init__(self, mlFramework, slurmConfig, artifactDir, models, hyperparameterSets, datasets, optimizers):
+        # Save arguments as instance variables
         self.mlFramework = mlFramework
+
+        self.artifactDir = artifactDir
+
+        """
+            Path describing artifact directory for each experiment instance. This is a generic path describing the directory pattern
+            for all instances. This path contains {instanceIdx}. When the experiment instance is created, the instanceIdx is
+            populated into the path and stored in the instance artifactDir.
+        """
+        self.expInstanceDir = artifactDir + "/instance_{instanceIdx}/"
+
+        self.slurmConfig = slurmConfig
         self.models = models
         self.hyperparameterSets = hyperparameterSets
         self.datasets = datasets
         self.optimizers = optimizers
-
-        self.artifactDir = None
-        self.expInstanceDir = None
-
-        self.slurmConfig = slurmConfig
 
     @abstractmethod
     def __getitem__(self, index):
@@ -78,10 +113,12 @@ class StaticExperiment():
 
     @abstractmethod
     def __len__(self):
-
+        """
+            Returns the number of experiment instances that will be generated
+        """
         raise NotImplementedError
 
-
+    # Returns a list containing all of the experiment instance objects
     def getExperimentInstances(self):
         instances = []
         print(len(self))
@@ -96,9 +133,10 @@ class StaticExperiment():
 # The __getitem__ method will simply return every combination of the 4 independent variables to be executed.
 class SimpleStaticExperiment(StaticExperiment):
 
-
-        def __init__(self, mlFramework, slurmConfig, models = {}, hyperparameterSets = {}, datasets = {}, optimizers = {}):
-            super().__init__(mlFramework, slurmConfig, models,  hyperparameterSets, datasets, optimizers)
+        # Initialize SimpleStaticExperiment
+        # No additional arguments to the base class (all arguments described in StaticExperiment)
+        def __init__(self, mlFramework, slurmConfig, artifactDir, models, hyperparameterSets, datasets, optimizers):
+            super().__init__(mlFramework, slurmConfig, artifactDir, models,  hyperparameterSets, datasets, optimizers)
 
 
         def __len__(self):
@@ -122,8 +160,10 @@ class SimpleStaticExperiment(StaticExperiment):
 
                 modelIdx = tempIdx%len(self.models)
 
-                return ExperimentInstance(self.mlFramework,
-                    index,
+                return ExperimentInstance(index,
+                    self.mlFramework,
+                    self.expInstanceDir,
+                    self.slurmConfig,
                     self.models[modelIdx],
                     self.hyperparameterSets[hyperparameterSetIdx]["hyperparameters"],
                     self.datasets[datasetIdx],
@@ -133,17 +173,6 @@ class SimpleStaticExperiment(StaticExperiment):
                     self.datasets[datasetIdx]["label"],
                      self.optimizers[optimizerIdx]["label"]
                 )
-
-
-if __name__ == "__main__":
-    exp = SimpleStaticExperiment('kera', [0,1],[0,1],[0,1])
-
-    instances = exp.getExperimentInstances()
-
-    for instance in instances:
-        print(instance)
-        print('\n')
-
 
 
 
