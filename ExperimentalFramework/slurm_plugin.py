@@ -17,6 +17,7 @@ class SlurmPlugin:
         return "#!/bin/bash\n\n"
 
     def srun(self, instance, slurmConfig):
+        print(slurmConfig)
         outStr = "srun "
         if(slurmConfig != {}):
             outStr += self.formatArgs(slurmConfig)
@@ -25,12 +26,20 @@ class SlurmPlugin:
         outStr += " &\n\n"
         return outStr
 
-    def generateBatchFile(self, experiment, expInstances):
+    def generateBatchFile(self, experiment):
         filename = experiment.artifactDir + "/run_experiment"
         with open(filename, "w+") as f:
             f.write(self.shebang())
 
-            for instance in expInstances:
-                f.write(self.srun(instance, experiment.slurmConfig))
+            for instance in experiment.expInstances:
+                slurmArgs = {
+                    "--nodes" : 1,
+                    "--ntasks" : 1,
+                    "--cpus-per-task" : instance.slurmConfig["cpus"],
+                    "--mem" : instance.slurmConfig["memory"],
+                    "--gres" : "gpu:" + str(instance.slurmConfig["gpus"]),
+                    "--output" :  instance.outputFile
+                }
+                f.write(self.srun(instance, slurmArgs))
 
-            return expInstances
+        return experiment

@@ -16,7 +16,8 @@ class ExperimentInstance():
         mlFramework - Name of machine learning framework to use, name must match plugin name exactly
         slurmConfig - Dictionary containing the arguments to pass to SLURM when executing this instance as defined in the config JSON folder.
                         This should not include the "--output" parameter (which will be added in the init)
-        artifactDir - Directory in which all the training artifacts are generated for the experiment instance        instanceIdx - Unique index assigned to instance. The experiment label + instance index define a unique identifier for each experiment instance
+        artifactDir - Directory in which all the training artifacts are generated for the experiment instance
+        instanceIdx - Unique index assigned to instance. The experiment label + instance index define a unique identifier for each experiment instance
         model - python module path containing the model associated with instance
         hyperparameters - dictionary containing hyperparameters associated with model
         dataset - path to dataset to train model
@@ -41,9 +42,9 @@ class ExperimentInstance():
         self.trainfile = None # Python file for training the model. This field is populated by the ML Framework plugin
         self.dockerfile = None # Dockerfile associated with instance. This field is populated by the dockerfile generator
         self.executeFile = None # Bash script to build and run docker container. THis field is populated by the dockerfile generator
-        self.outputFile = "instance_{instanceIdx}.out".format(self.instanceIdx) # File to redirect stdout/stderr, defined relative to artifactDir
+        self.outputFile = "instance_{instanceIdx}.out".format(instanceIdx=self.instanceIdx) # File to redirect stdout/stderr, defined relative to artifactDir
 
-        slurmConfig['--output'] = self.outputFile
+        print(slurmConfig)
 
         # Generate combined label to describe experiment instance
         self.label = "Experiment Instance: {instanceIdx}\nModel: {modelLbl}\nOptimizer: {optimizerLbl}\nHyperparameterSet: {hpLbl}\nDataset: {datasetLbl}\n".format(
@@ -74,6 +75,7 @@ class ExperimentInstance():
 # such as hyperparameter search
 class StaticExperiment():
     """
+        label - Name assigned to the experiment in the config file
         mlFramework - Name of machine learning framework to use, name must match plugin name exactly
         slurmConfig - Dictionary containing the arguments to pass to SLURM when executing this instance as defined in the config JSON folder.
                         This should not include the "--output" parameter (which will be added in the experimentInstance)
@@ -84,8 +86,9 @@ class StaticExperiment():
         datasets - Dictionary of the datsets from the config json file
         optimizers - Dictionary of the optimizers from the config json file
     """
-    def __init__(self, mlFramework, slurmConfig, artifactDir, models, hyperparameterSets, datasets, optimizers):
+    def __init__(self, label, mlFramework, slurmConfig, artifactDir, models, hyperparameterSets, datasets, optimizers):
         # Save arguments as instance variables
+        self.label = label
         self.mlFramework = mlFramework
 
         self.artifactDir = artifactDir
@@ -103,13 +106,21 @@ class StaticExperiment():
         self.datasets = datasets
         self.optimizers = optimizers
 
-    @abstractmethod
-    def __getitem__(self, index):
-        '''
-        Returns an Experiment Instance object, which will be translated into a a file to execute training
-        '''
+        self.expInstances = self.__generateInstances__()
 
+    @abstractmethod
+    def __generateInstances__(self):
+        """
+            Generates the experiment instances for the static experiment
+        """
         raise NotImplementedError
+
+    def __getitem__(self, index):
+        if(index >= len(self)):
+                #Todo: Define this exception
+                raise Exception()
+        else:
+            return(self.expInstances[index])
 
     @abstractmethod
     def __len__(self):
@@ -118,13 +129,10 @@ class StaticExperiment():
         """
         raise NotImplementedError
 
+
     # Returns a list containing all of the experiment instance objects
     def getExperimentInstances(self):
-        instances = []
-        print(len(self))
-        for idx in range(0,len(self)):
-            instances.append(self[idx])
-        return instances
+        return self.expInstances
 
 
 ## SimpleStaticExperiment
@@ -135,19 +143,13 @@ class SimpleStaticExperiment(StaticExperiment):
 
         # Initialize SimpleStaticExperiment
         # No additional arguments to the base class (all arguments described in StaticExperiment)
-        def __init__(self, mlFramework, slurmConfig, artifactDir, models, hyperparameterSets, datasets, optimizers):
-            super().__init__(mlFramework, slurmConfig, artifactDir, models,  hyperparameterSets, datasets, optimizers)
+        def __init__(self, label, mlFramework, slurmConfig, artifactDir, models, hyperparameterSets, datasets, optimizers):
+            super().__init__(label, mlFramework, slurmConfig, artifactDir, models,  hyperparameterSets, datasets, optimizers)
 
-
-        def __len__(self):
-            return len(self.datasets)*len(self.models)*len(self.hyperparameterSets)*len(self.optimizers)
-
-        def __getitem__(self, index):
-            if(index >= len(self)):
-                #Todo: Define this exception
-                raise Exception()
-            else:
-                tempIdx = index
+        def __generateInstances__(self):
+            instances = []
+            for i in range(self.__len__()):
+                tempIdx = i
 
                 datasetIdx = tempIdx%len(self.datasets)
                 tempIdx = int(tempIdx/len(self.datasets))
@@ -160,7 +162,7 @@ class SimpleStaticExperiment(StaticExperiment):
 
                 modelIdx = tempIdx%len(self.models)
 
-                return ExperimentInstance(index,
+                instances.append(ExperimentInstance(i,
                     self.mlFramework,
                     self.expInstanceDir,
                     self.slurmConfig,
@@ -171,8 +173,14 @@ class SimpleStaticExperiment(StaticExperiment):
                     self.models[modelIdx]["label"],
                     self.hyperparameterSets[hyperparameterSetIdx]["label"],
                     self.datasets[datasetIdx]["label"],
-                     self.optimizers[optimizerIdx]["label"]
+                     self.optimizers[optimizerIdx]["label"])
                 )
+            return instances
+
+
+        def __len__(self):
+            return len(self.datasets)*len(self.models)*len(self.hyperparameterSets)*len(self.optimizers)
+
 
 
 

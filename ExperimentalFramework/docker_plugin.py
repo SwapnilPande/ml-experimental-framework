@@ -33,10 +33,10 @@ class DockerPlugin:
             label = label,
             instanceIdx = instance.instanceIdx)
 
-    def generateDockerFiles(self, label, expInstances, instanceDir, frameworkContainer):
-        for instance in expInstances:
+    def generateDockerFiles(self, experiment, frameworkContainer):
+        for instance in experiment.expInstances:
             # Construct full filename and path for python training file
-            dockerfileName = (instanceDir + "Dockerfile").format(
+            dockerfileName = (os.path.join(instance.artifactDir, "Dockerfile")).format(
                 instanceIdx = instance.instanceIdx
             )
 
@@ -47,15 +47,15 @@ class DockerPlugin:
                 f.write(self.runTrainFile(instance))
             instance.dockerfile = dockerfileName
 
-            executedockerfileName = (instanceDir + "run_dockerfile").format(
+            executedockerfileName = (os.path.join(instance.artifactDir, "run_dockerfile")).format(
                 instanceIdx = instance.instanceIdx
             )
 
             with open(executedockerfileName, "w+") as f:
                 f.write(self.shebang())
-                f.write(self.dockerBuild(label, instance))
-                f.write(self.dockerRun(label, instance))
+                f.write(self.dockerBuild(experiment.label, instance))
+                f.write(self.dockerRun(experiment.label, instance))
             instance.executeFile = executedockerfileName
 
 
-        return expInstances
+        return experiment

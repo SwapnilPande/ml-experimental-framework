@@ -6,79 +6,81 @@ import slurm_plugin
 
 class ExperimentInterpreter:
 
-    def __init__(self, expConfigFilepath, artifactDir):
-        # Open and read in JSON file as dictionary
-        self.expConfigFilepath = expConfigFilepath
-        with open(expConfigFilepath) as f:
-            self.expConfig = json.load(f) # Load JSON as dict
+    def __init__(self, artifactDir, mlFwk):
+        # Save the directory in which all of the artifacts for the experiments will be generated
+        self.artifactDir = artifactDir
 
-        self.expLabel = self.expConfig["label"]
-
-        #Save framework models, hyperparameter sets, datasets, and optimizers
-        self.mlFwk = self.expConfig["ml_framework"]
-        self.models = self.expConfig["models"]
-        self.hyperparameterSets = self.expConfig["hyperparameter_sets"]
-        self.datasets = self.expConfig["datasets"]
-        self.optimizers = self.expConfig["optimizers"]
-
-
+        self.mlFwk = mlFwk
         # Imports the necessary ML framework plugin as defined in config
-        self.pluginName = self.mlFwk + "_plugin"
+        self.pluginName = mlFwk + "_plugin"
         self.mlFwkPluginImport = __import__(self.pluginName)
+        print("Debug - Machine Learning Framework : " + self.mlFwk)
 
         #Initialize the plugin object from the ML Framework file
         self.mlFwkPlugin = self.mlFwkPluginImport.plugin()
         self.dockerPlugin = docker_plugin.DockerPlugin()
         self.slurmPlugin = slurm_plugin.SlurmPlugin()
 
-        print("Debug - Machine Learning Framework : " + self.expConfig["ml_framework"])
 
-        #Check if experiment type is static simpe. If it is, create an experiment object and generate the instances
-        if(self.expConfig["experiment_type"] == "static_simple"):
-            self.experiment = Experiment.SimpleStaticExperiment(self.mlFwk,
-            self.slurmConfig,
-            self.models,
-            self.hyperparameterSets,
-            self.datasets,
-            self.optimizers)
+    def executeExperiment(self, expConfigFilepath):
+        # Open and read in JSON file as dictionary
+        with open(expConfigFilepath) as f:
+            expConfig = json.load(f) # Load JSON as dict
 
-            self.instances = self.experiment.getExperimentInstances()
-            # for instance in self.instances:
-            #     #print(instance)
+        # Create an experiment object based on the expConfig file
+        experiment = self.__generateExperimentObject__(expConfig)
 
-        self.experiment.artifactDir = (artifactDir + "/{label}").format(label = self.expLabel)
-        self.experiment.expInstanceDir = self.experiment.artifactDir + "/instance_{instanceIdx}/"
-        self.experiment.outputDir = self.experiment.artifactDir + "/instance_{instanceIdx}.out"
+        # Generate directories for experiment and experiment instances in the artifact directory
+        self.__createExperimentDirs__(experiment)
+
+        self.generateTrainingFiles(experiment)
+        self.generateDockerFiles(experiment)
+        self.generateSlurmBatchFile(experiment)
 
 
-        self.slurmConfig = {
-            "--nodes" : 1,
-            "--ntasks" : 1,
-            "--cpus-per-task" : self.expConfig["resources"]["cpus"],
-            "--mem" : self.expConfig["resources"]["memory"],
-            "--gres" : "gpu" + str(self.expConfig["resources"]["gpus"]),
-            "--output" :  self.experiment.outputDir
-        }
+    def __generateExperimentObject__(self, expConfig):
 
-    def initializeExpDirs(self):
-        os.mkdir(self.experiment.artifactDir)
-        for instance in self.instances:
-            os.mkdir(self.experiment.expInstanceDir.format(instanceIdx = instance.instanceIdx))
+        # Generate a dictionary containing slurm configuration from config file
+        # Does not include the output parameter
+
+        expDir = self.__generateUniqueExperimentDir__(expConfig["label"])
+
+        #Check if experiment type is static simple. If it is, create an experiment object and generate the instances
+        if(expConfig["experiment_type"] == "static_simple"):
+            experiment = Experiment.SimpleStaticExperiment(expConfig["label"],
+            self.mlFwk,
+            expConfig["resources"],
+            expDir,
+            expConfig["models"],
+            expConfig["hyperparameter_sets"],
+            expConfig["datasets"],
+            expConfig["optimizers"])
+
+        # Return the generated experiment object
+        return experiment
+
+    def __generateUniqueExperimentDir__(self, expLabel):
+        expDir = os.path.join(self.artifactDir,expLabel)
+        # TODO - generate unique hash for each file
+        return expDir
 
 
-    def generateTrainingFiles(self):
-        self.instances = self.mlFwkPlugin.generateTrainingFiles(self.expLabel, self.instances, self.experiment.expInstanceDir)
+    def __createExperimentDirs__(self, experiment):
+        os.mkdir(experiment.artifactDir)
+        for instance in experiment.expInstances:
+            os.mkdir(instance.artifactDir)
 
-    def generateDockerFiles(self):
-        self.instances = self.dockerPlugin.generateDockerFiles(self.expLabel, self.instances, self.experiment.expInstanceDir, "kerasContainer")
 
-    def generateSlurmBatchFile(self):
-        self.experiment = self.slurmPlugin.generateBatchFile(self.experiment, self.instances)
+    def generateTrainingFiles(self, experiment):
+        return self.mlFwkPlugin.generateTrainingFiles(experiment)
+
+    def generateDockerFiles(self, experiment):
+        self.instances = self.dockerPlugin.generateDockerFiles(experiment, "kerasContainer")
+
+    def generateSlurmBatchFile(self, experiment):
+        self.experiment = self.slurmPlugin.generateBatchFile(experiment)
 
 
 if(__name__ == "__main__"):
-    expInterpret = ExperimentInterpreter("sampleconfig.json","test")
-    expInterpret.initializeExpDirs()
-    expInterpret.generateTrainingFiles()
-    expInterpret.generateDockerFiles()
-    expInterpret.generateSlurmBatchFile()
+    expInterpret = ExperimentInterpreter("test", "keras")
+    expInterpret.executeExperiment("sampleconfig.json")

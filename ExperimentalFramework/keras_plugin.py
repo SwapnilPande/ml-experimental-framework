@@ -53,11 +53,11 @@ class plugin:
     def getRequirements(self):
         return ["keras"]
 
-    def generateTrainingFiles(self, label, expInstances, instanceDir):
-        for instance in expInstances:
+    def generateTrainingFiles(self, experiment):
+        for instance in experiment.expInstances:
             # Construct full filename and path for python training file
-            filename = (instanceDir + "train-{label}-{instanceIdx}.py").format(
-                label = label,
+            filename = (os.path.join(instance.artifactDir,"train-{label}-{instanceIdx}.py")).format(
+                label = experiment.label,
                 instanceIdx = instance.instanceIdx
             )
 
@@ -71,4 +71,4 @@ class plugin:
                 f.write(self.fitGenerator(instance))
 
             instance.trainfile = filename
-        return expInstances
+        return experiment
