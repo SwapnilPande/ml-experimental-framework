@@ -41,5 +41,5 @@ class SlurmPlugin:
                     "--output" :  instance.outputFile
                 }
                 f.write(self.srun(instance, slurmArgs))
-
+        experiment.executeFile = filename
         return experiment

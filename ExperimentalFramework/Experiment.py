@@ -99,6 +99,7 @@ class StaticExperiment():
             populated into the path and stored in the instance artifactDir.
         """
         self.expInstanceDir = artifactDir + "/instance_{instanceIdx}/"
+        self.executeFile = None # Path to file to run entire experiment (populated by SLURM plugin)
 
         self.slurmConfig = slurmConfig
         self.models = models
@@ -107,6 +108,8 @@ class StaticExperiment():
         self.optimizers = optimizers
 
         self.expInstances = self.__generateInstances__()
+
+
 
     @abstractmethod
     def __generateInstances__(self):

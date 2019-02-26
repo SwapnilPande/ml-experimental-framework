@@ -42,7 +42,7 @@ class ExperimentInterpreter:
         experiment = self.__generateExperimentObject__(expConfig)
 
         # Generate directories for experiment and experiment instances in the artifact directory
-        self.__createExperimentDirs__(experiment)
+        self.__generateExperimentDirs__(experiment)
 
         # Generate artifacts
         self.generateTrainingFiles(experiment)
@@ -55,7 +55,7 @@ class ExperimentInterpreter:
     # expConfig - Dictionary containing contents of config JSON file
     def __generateExperimentObject__(self, expConfig):
         # Generate a dictionary containing slurm configuration from config file
-        expDir = self.__generateUniqueExperimentDir__(expConfig["label"])
+        expDir = self.__generateUniqueExperimentName__(expConfig["label"])
 
         #Check if experiment type is static simple. If it is, create an experiment object and generate the instances
         if(expConfig["experiment_type"] == "static_simple"):
@@ -71,24 +71,47 @@ class ExperimentInterpreter:
         # Return the generated experiment object
         return experiment
 
-    def __generateUniqueExperimentDir__(self, expLabel):
+    ## __generateUniqueExperimentName__(self, expLabel)
+    # Creates a unique name for the artifacts for an experiment in the configured artifact directory
+    # TODO - Generate a unique hash to append to the experiment artifact directory
+    # expLabel - Experiment label given in config file
+    # returns the path for the experiment artifact directory using the unique name
+    # Path: {ArtifactDir}/{ExperimentName}
+    def __generateUniqueExperimentName__(self, expLabel):
         expDir = os.path.join(self.artifactDir,expLabel)
         # TODO - generate unique hash for each file
         return expDir
 
-
-    def __createExperimentDirs__(self, experiment):
+    ## __generateExperimentDirs__(self, experiment)
+    # Generates the experiment artifact directory and all of the experiment instance subdirectories
+    # experiment - Experiment object for which to create directories
+    # returns nothing
+    def __generateExperimentDirs__(self, experiment):
         os.mkdir(experiment.artifactDir)
         for instance in experiment.expInstances:
             os.mkdir(instance.artifactDir)
 
-
+    ## generateTrainingFiles(self, experiment)
+    # Generates the python training file for each experiment instance
+    # Uses the machine learning framework plugin to generate file
+    # experiment - experiment object
+    # returns updated experiment object with the training file field in each experiment instance populated
     def generateTrainingFiles(self, experiment):
         return self.mlFwkPlugin.generateTrainingFiles(experiment)
 
+    ## generateDockerFiles(self, experiment)
+    # Generates the dockerfile and script to build & run docker container for each experiment instance
+    # Uses the docker plugin to generate files
+    # experiment - experiment object
+    # returns updated experiment object with the execution file field in each experiment instance populated
     def generateDockerFiles(self, experiment):
         self.instances = self.dockerPlugin.generateDockerFiles(experiment, "kerasContainer")
 
+    ## generateSlurmBatchFile(self, experiment)
+    # Generates the batch file to send all experiment instance jobs to SLURM
+    # Uses the SLURM plugin to generate the file
+    # experiment - experiment object
+    # returns updated experiment object
     def generateSlurmBatchFile(self, experiment):
         self.experiment = self.slurmPlugin.generateBatchFile(experiment)
 
