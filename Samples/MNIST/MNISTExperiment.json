@@ -13,16 +13,16 @@
     "models" :
     [
         {
-            "label" : "m1",
-            "path" : "model1",
+            "label" : "simple_deep_network",
+            "path" : "simple_deep",
             "model_parameters" : {
                 "loss" : "mse",
                 "metrics" : "accuracy"
             }
         },
         {
-            "label" : "model2",
-            "path" : "model2",
+            "label" : "simple_deeper_network",
+            "path" : "simple_deeper",
             "model_parameters" : {
                 "loss" : "mse",
                 "metrics" : "accuracy"
@@ -43,14 +43,9 @@
     "datasets":
     [
         {
-            "label" : "ds1",
-            "path" : "dataset1",
-            "preprocessor" : "preprocesor1"
-        },
-        {
-            "label" : "ds2",
-            "path" : "dataset2",
-            "preprocessor" : "preprocesor2"
+            "label" : "simple_deep_256",
+            "path" : ".",
+            "preprocessor" : "preprocessors.deep_simple"
         }
     ],
     "optimizers" :

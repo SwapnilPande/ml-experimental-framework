@@ -1,6 +1,15 @@
 import os
+import Experiment
+
 
 class DockerPlugin:
+
+    def __init__(self):
+        # Define the mount directores for the data and experiment
+        self.datasetMountDir = "/data"
+        self.artifactMountDir = "/experiment"
+
+
     def fromContainer(self, frameworkContainer):
         return "FROM " + frameworkContainer + "\n\n"
 
@@ -28,10 +37,17 @@ class DockerPlugin:
             instanceIdx = instance.instanceIdx,
             instanceDir = instanceDir)
 
-    def dockerRun(self, label, instance):
-        return "docker run {label}-{instanceIdx}".format(
+    def dockerRun(self, label, expArtifactDir, instance):
+        runArgs = "--rm -v {dataDir}:{dataMountDir} -v {experimentDir}:{experimentMountDir}".format(
+            dataDir = instance.getDataset()["path"],
+            dataMountDir = self.datasetMountDir,
+            experimentDir = expArtifactDir,
+            experimentMountDir = self.artifactMountDir
+        )
+        return "docker run {args} {label}-{instanceIdx} ".format(
             label = label,
-            instanceIdx = instance.instanceIdx)
+            instanceIdx = instance.instanceIdx,
+            args = runArgs)
 
     def generateDockerFiles(self, experiment, frameworkContainer):
         for instance in experiment.expInstances:
@@ -54,7 +70,7 @@ class DockerPlugin:
             with open(executedockerfileName, "w+") as f:
                 f.write(self.shebang())
                 f.write(self.dockerBuild(experiment.label, instance))
-                f.write(self.dockerRun(experiment.label, instance))
+                f.write(self.dockerRun(experiment.label, experiment.artifactDir, instance))
             instance.executeFile = executedockerfileName
 
 

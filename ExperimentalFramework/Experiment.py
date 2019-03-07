@@ -44,8 +44,6 @@ class ExperimentInstance():
         self.executeFile = None # Bash script to build and run docker container. THis field is populated by the dockerfile generator
         self.outputFile = "instance_{instanceIdx}.out".format(instanceIdx=self.instanceIdx) # File to redirect stdout/stderr, defined relative to artifactDir
 
-        print(slurmConfig)
-
         # Generate combined label to describe experiment instance
         self.label = "Experiment Instance: {instanceIdx}\nModel: {modelLbl}\nOptimizer: {optimizerLbl}\nHyperparameterSet: {hpLbl}\nDataset: {datasetLbl}\n".format(
             instanceIdx = instanceIdx,

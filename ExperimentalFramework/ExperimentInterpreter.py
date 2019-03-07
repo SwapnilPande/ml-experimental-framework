@@ -117,5 +117,5 @@ class ExperimentInterpreter:
 
 
 if(__name__ == "__main__"):
-    expInterpret = ExperimentInterpreter("test", "keras")
+    expInterpret = ExperimentInterpreter("C:/Users/Swapnil/Desktop/ImportantThings/MaxMobility/ExperimentFramework/ml-experimental-framework/artifacts", "keras")
     expInterpret.executeExperiment("sampleconfig.json")
