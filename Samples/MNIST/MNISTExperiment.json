@@ -14,17 +14,17 @@
     [
         {
             "label" : "simple_deep_network",
-            "path" : "simple_deep",
+            "path" : "models.simple_deep",
             "model_parameters" : {
-                "loss" : "mse",
+                "loss" : "categorical_crossentropy",
                 "metrics" : "accuracy"
             }
         },
         {
             "label" : "simple_deeper_network",
-            "path" : "simple_deeper",
+            "path" : "models.simple_deeper",
             "model_parameters" : {
-                "loss" : "mse",
+                "loss" : "categorical_crossentropy",
                 "metrics" : "accuracy"
             }
         }
@@ -57,7 +57,7 @@
                 "optimizer_parameters" :
                 {
                     "lr" : 0.01,
-                    "momentum" : 0.9,
+                    "momentum" : 0.01,
                     "decay" : 0.01
                 }
             }

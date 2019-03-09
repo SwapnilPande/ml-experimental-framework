@@ -3,7 +3,7 @@ from keras.models import Model
 
 def getModel():
     # This returns a tensor
-    inputs = Input(shape=(28,28))
+    inputs = Input(shape=(784,))
 
     # a layer instance is callable on a tensor, and returns a tensor
     l1 = Dense(64, activation='relu')(inputs)
