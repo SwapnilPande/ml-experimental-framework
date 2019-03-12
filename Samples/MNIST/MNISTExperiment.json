@@ -1,6 +1,6 @@
 {
     "ml_framework" : "keras",
-    "label" : "Simple_MNIST_Experiment",
+    "label" : "simple_mnist_experiment",
     "experiment_type" : "static_simple",
 
     "resources" :
@@ -14,7 +14,7 @@
     [
         {
             "label" : "simple_deep_network",
-            "path" : "simple_deep",
+            "path" : "models.simple_deep",
             "model_parameters" : {
                 "loss" : "mse",
                 "metrics" : "accuracy"
@@ -22,7 +22,7 @@
         },
         {
             "label" : "simple_deeper_network",
-            "path" : "simple_deeper",
+            "path" : "models.simple_deeper",
             "model_parameters" : {
                 "loss" : "mse",
                 "metrics" : "accuracy"
