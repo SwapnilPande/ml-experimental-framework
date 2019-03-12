@@ -1,6 +1,6 @@
 {
     "ml_framework" : "keras",
-    "label" : "test_experiment",
+    "label" : "Simple_MNIST_Experiment",
     "experiment_type" : "static_simple",
 
     "resources" :
@@ -14,17 +14,17 @@
     [
         {
             "label" : "simple_deep_network",
-            "path" : "models.simple_deep",
+            "path" : "simple_deep",
             "model_parameters" : {
-                "loss" : "categorical_crossentropy",
+                "loss" : "mse",
                 "metrics" : "accuracy"
             }
         },
         {
             "label" : "simple_deeper_network",
-            "path" : "models.simple_deeper",
+            "path" : "simple_deeper",
             "model_parameters" : {
-                "loss" : "categorical_crossentropy",
+                "loss" : "mse",
                 "metrics" : "accuracy"
             }
         }
@@ -44,7 +44,7 @@
     [
         {
             "label" : "simple_deep_256",
-            "path" : ".",
+            "path" : "",
             "preprocessor" : "preprocessors.deep_simple"
         }
     ],
@@ -57,7 +57,7 @@
                 "optimizer_parameters" :
                 {
                     "lr" : 0.01,
-                    "momentum" : 0.01,
+                    "momentum" : 0.9,
                     "decay" : 0.01
                 }
             }

@@ -78,18 +78,20 @@ class StaticExperiment():
         slurmConfig - Dictionary containing the arguments to pass to SLURM when executing this instance as defined in the config JSON folder.
                         This should not include the "--output" parameter (which will be added in the experimentInstance)
         artifactDir - Directory path in which all the training artifacts are generated for the experiment
+        experimentDir - Directory containing the ExperimentConfig.json file and all associated files
 
         models - Dictionary of the models from the config json file
         hyperparameterSets - Dictionary of the hyperparameterSets from config json file
         datasets - Dictionary of the datsets from the config json file
         optimizers - Dictionary of the optimizers from the config json file
     """
-    def __init__(self, label, mlFramework, slurmConfig, artifactDir, models, hyperparameterSets, datasets, optimizers):
+    def __init__(self, label, mlFramework, slurmConfig, artifactDir, experimentDir, models, hyperparameterSets, datasets, optimizers):
         # Save arguments as instance variables
         self.label = label
         self.mlFramework = mlFramework
 
         self.artifactDir = artifactDir
+        self.experimentDir = experimentDir
 
         """
             Path describing artifact directory for each experiment instance. This is a generic path describing the directory pattern
@@ -144,8 +146,8 @@ class SimpleStaticExperiment(StaticExperiment):
 
         # Initialize SimpleStaticExperiment
         # No additional arguments to the base class (all arguments described in StaticExperiment)
-        def __init__(self, label, mlFramework, slurmConfig, artifactDir, models, hyperparameterSets, datasets, optimizers):
-            super().__init__(label, mlFramework, slurmConfig, artifactDir, models,  hyperparameterSets, datasets, optimizers)
+        def __init__(self, label, mlFramework, slurmConfig, artifactDir, experimentDir, models, hyperparameterSets, datasets, optimizers):
+            super().__init__(label, mlFramework, slurmConfig, artifactDir, experimentDir, models,  hyperparameterSets, datasets, optimizers)
 
         def __generateInstances__(self):
             instances = []

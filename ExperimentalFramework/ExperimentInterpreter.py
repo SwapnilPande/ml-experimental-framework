@@ -31,15 +31,17 @@ class ExperimentInterpreter:
 
     ## executeExperiment(self, expConfigFilepath)
     # This method should be called to run an experiment from a config JSON file
-    # The method will instantiate the experiment object, generate all of the training artifacts, and send the jobs to SLURM
+    # The method will instantiate the experiment object, generate all of the training artifacts, and send the jobs to SLURM\
+    # expDir - Directory containing experiment config json file & associated python files
     # expConfigFilepath - Path to the config JSON
-    def executeExperiment(self, expConfigFilepath):
+    def executeExperiment(self, expDir, expConfigFile):
+        expConfigFilepath = os.path.join(expDir, expConfigFile)
         # Open and read in JSON file as dictionary
         with open(expConfigFilepath) as f:
             expConfig = json.load(f) # Load JSON as dict
 
         # Create an experiment object based on the expConfig file
-        experiment = self.__generateExperimentObject__(expConfig)
+        experiment = self.__generateExperimentObject__(expDir, expConfig)
 
         # Generate directories for experiment and experiment instances in the artifact directory
         self.__generateExperimentDirs__(experiment)
@@ -52,16 +54,18 @@ class ExperimentInterpreter:
 
     ## __generateExperimentObject__(self, expConfig)
     # Generates an experiment object given a experiment config
+    # expDir - Directory containing experiment config json file & associated python files
     # expConfig - Dictionary containing contents of config JSON file
-    def __generateExperimentObject__(self, expConfig):
+    def __generateExperimentObject__(self, expDir, expConfig):
         # Generate a dictionary containing slurm configuration from config file
-        expDir = self.__generateUniqueExperimentName__(expConfig["label"])
+        expArtifactDir = self.__generateUniqueExperimentName__(expConfig["label"])
 
         #Check if experiment type is static simple. If it is, create an experiment object and generate the instances
         if(expConfig["experiment_type"] == "static_simple"):
             experiment = Experiment.SimpleStaticExperiment(expConfig["label"],
             self.mlFwk,
             expConfig["resources"],
+            expArtifactDir,
             expDir,
             expConfig["models"],
             expConfig["hyperparameter_sets"],
@@ -105,7 +109,8 @@ class ExperimentInterpreter:
     # experiment - experiment object
     # returns updated experiment object with the execution file field in each experiment instance populated
     def generateDockerFiles(self, experiment):
-        self.instances = self.dockerPlugin.generateDockerFiles(experiment, "kerasContainer")
+        #TODO: Modularize container
+        self.instances = self.dockerPlugin.generateDockerFiles(experiment, "nvcr.io/nvidia/tensorflow:18.04-py3")
 
     ## generateSlurmBatchFile(self, experiment)
     # Generates the batch file to send all experiment instance jobs to SLURM
