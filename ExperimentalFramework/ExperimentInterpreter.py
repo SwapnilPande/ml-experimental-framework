@@ -64,6 +64,7 @@ class ExperimentInterpreter:
         if(expConfig["experiment_type"] == "static_simple"):
             experiment = Experiment.SimpleStaticExperiment(expConfig["label"],
             self.mlFwk,
+            expConfig["pip_requirements"],
             expConfig["resources"],
             expArtifactDir,
             expDir,

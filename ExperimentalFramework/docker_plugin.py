@@ -25,6 +25,9 @@ class DockerPlugin:
             outStr += "\n\n"
         return outStr
 
+    def installPipRequirements(self, requirements):
+        return "RUN pip install {requirements}\n\n".format(requirements = " ".join(requirements))
+
     def pythonEnvironment(self):
         return "ENV PYTHONPATH \"${{PYTHONPATH}}:{experimentMountDir}\"\n\n".format(experimentMountDir = self.experimentMountDir)
 
@@ -77,6 +80,7 @@ class DockerPlugin:
             with open(dockerfileName, "w+") as f:
                 f.write(self.fromContainer(frameworkContainer))
                 f.write(self.installDependencies(["libsm6", "libxext6"]))
+                f.write(self.installPipRequirements(experiment.requirements))
                 f.write(self.pythonEnvironment())
                 f.write(self.runTrainFile(instance))
             instance.dockerfile = dockerfileName

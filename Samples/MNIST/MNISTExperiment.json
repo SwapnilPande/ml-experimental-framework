@@ -2,7 +2,7 @@
     "ml_framework" : "keras",
     "label" : "simple_mnist_experiment",
     "experiment_type" : "static_simple",
-
+    "pip_requirements" : ["keras"],
     "resources" :
     {
         "cpus" : 5,
