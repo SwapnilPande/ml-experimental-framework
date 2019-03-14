@@ -38,7 +38,7 @@ class SlurmPlugin:
                     "--cpus-per-task" : instance.slurmConfig["cpus"],
                     "--mem" : instance.slurmConfig["memory"],
                     "--gres" : "gpu:" + str(instance.slurmConfig["gpus"]),
-                    "--output" :  instance.outputFile
+                    "--output" :  os.path.join(instance.artifactDir,instance.outputFile)
                 }
                 f.write(self.srun(instance, slurmArgs))
         experiment.executeFile = filename
