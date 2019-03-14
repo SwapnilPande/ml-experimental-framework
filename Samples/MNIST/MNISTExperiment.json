@@ -17,7 +17,7 @@
             "path" : "models.simple_deep",
             "model_parameters" : {
                 "loss" : "mse",
-                "metrics" : "accuracy"
+                "metrics" : ["accuracy"]
             }
         },
         {
@@ -25,7 +25,7 @@
             "path" : "models.simple_deeper",
             "model_parameters" : {
                 "loss" : "mse",
-                "metrics" : "accuracy"
+                "metrics" : ["accuracy"]
             }
         }
     ],
