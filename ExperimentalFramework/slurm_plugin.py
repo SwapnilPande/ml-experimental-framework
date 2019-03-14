@@ -17,7 +17,6 @@ class SlurmPlugin:
         return "#!/bin/bash\n\n"
 
     def srun(self, instance, slurmConfig):
-        print(slurmConfig)
         outStr = "srun "
         if(slurmConfig != {}):
             outStr += self.formatArgs(slurmConfig)
