@@ -25,7 +25,6 @@ class DockerPlugin:
         return outStr
 
     def installPipRequirements(self, requirements):
-        outStr = "RUN pip install "
         return "RUN pip install {requirements}\n\n".format(requirements = " ".join(requirements))
 
     def pythonEnvironment(self):
