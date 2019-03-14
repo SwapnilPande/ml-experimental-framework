@@ -68,6 +68,9 @@ class DockerPlugin:
 
     def generateDockerFiles(self, experiment, frameworkContainer):
         for instance in experiment.expInstances:
+            # Update the output file to include the path to the isntance artifact directory within the docker container
+            instance.outputFile = os.path.join(self.artifactMountDir, instance.outputFile)
+
             # Construct full filename and path for python training file
             dockerfileName = (os.path.join(instance.artifactDir, "Dockerfile")).format(
                 instanceIdx = instance.instanceIdx
