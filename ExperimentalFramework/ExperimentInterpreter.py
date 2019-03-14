@@ -111,7 +111,7 @@ class ExperimentInterpreter:
     # returns updated experiment object with the execution file field in each experiment instance populated
     def generateDockerFiles(self, experiment):
         #TODO: Modularize container
-        self.instances = self.dockerPlugin.generateDockerFiles(experiment, "tensorflow/tensorflow:latest-gpu-py3")
+        self.instances = self.dockerPlugin.generateDockerFiles(experiment, "nvcr.io/nvidia/tensorflow:18.04-py3")
 
     ## generateSlurmBatchFile(self, experiment)
     # Generates the batch file to send all experiment instance jobs to SLURM

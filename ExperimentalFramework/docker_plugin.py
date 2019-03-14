@@ -32,9 +32,7 @@ class DockerPlugin:
 
     def runTrainFile(self, instance):
         _,file = os.path.split(instance.trainfile)
-        outStr = "RUN cd {artifactMountDir}\n".format(artifactMountDir = self.artifactMountDir)
-        outStr += "CMD python {trainfile}".format(trainfile=file)
-        return outStr
+        return "CMD python {trainfile}".format(trainfile=os.path.join(self.artifactMountDir, file))
 
     def shebang(self):
         return "#!/bin/bash\n\n"
