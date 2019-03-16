@@ -90,6 +90,14 @@ class plugin:
             outStr += "print(\"Final Test Loss: \" + str(testResult))\n\n"
         return outStr
 
+    def saveModel(self, label, expInstance):
+        modelFileName =  (os.path.join(expInstance.artifactDir,"model-{label}-{instanceIdx}.h5")).format(
+                label = label,
+                instanceIdx = expInstance.instanceIdx
+            )
+        outStr = "model.save(\"{filename}\")\n\n".format(filename = modelFileName)
+        return outStr
+
     def getRequirements(self):
         return ["keras"]
 
@@ -110,6 +118,7 @@ class plugin:
                 f.write(self.model(instance))
                 f.write(self.fitGenerator(instance))
                 f.write(self.evaluateGenerator(instance))
+                f.write(self.saveModel(experiment.label, instance))
 
             instance.trainfile = filename
         return experiment
