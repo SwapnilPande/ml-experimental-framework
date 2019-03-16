@@ -91,7 +91,7 @@ class plugin:
         return outStr
 
     def saveModel(self, label, expInstance):
-        modelFileName =  (os.path.join(expInstance.artifactDir,"model-{label}-{instanceIdx}.h5")).format(
+        modelFileName =  os.path.join("/artifacts","model-{label}-{instanceIdx}.h5").format(
                 label = label,
                 instanceIdx = expInstance.instanceIdx
             )
