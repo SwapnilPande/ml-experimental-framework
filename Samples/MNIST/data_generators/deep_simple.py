@@ -5,7 +5,7 @@ import math
 
 # Simple data preprecsoor to feed data to the neural network
 class SimplePreprocessor(Sequence):
-    def __init__(self, batchSize = 32, dataset = "train"):
+    def __init__(self, batchSize, dataset):
         self.batchSize = batchSize
 
         if(dataset == "train"): # Train Data
@@ -32,5 +32,5 @@ class SimplePreprocessor(Sequence):
         return math.ceil(self.x.shape[0]/self.batchSize)
 
 
-def getGenerator():
-    return SimplePreprocessor(256)
+def getGenerator(batch_size = 32, dataset = "train"):
+    return SimplePreprocessor(batch_size, dataset)

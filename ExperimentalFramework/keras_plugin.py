@@ -77,16 +77,16 @@ class plugin:
 
     def fitGenerator(self, expInstance):
         if("validation" in expInstance.dataset):
-            outStr = "model.fit_generator(train_generator, validation_data = validation_generator,  {args})\n\n".format(args = self.formatArgs(expInstance.hyperparameters))
+            outStr = "model.fit_generator(trainDataGen, validation_data = validationDataGen,  {args})\n\n".format(args = self.formatArgs(expInstance.hyperparameters))
         else:
-            outStr = "model.fit_generator(train_generator,  {args})\n\n".format(args = self.formatArgs(expInstance.hyperparameters))
+            outStr = "model.fit_generator(trainDataGen,  {args})\n\n".format(args = self.formatArgs(expInstance.hyperparameters))
         return outStr
 
     def evaluateGenerator(self, expInstance):
         outStr = ""
         if("test" in expInstance.dataset):
             outStr += "# Test Model\n"
-            outStr += "testResult = model.evaluate_generator(test_generator)\n"
+            outStr += "testResult = model.evaluate_generator(testDataGen)\n"
             outStr += "print(\"Final Test Loss: \" + str(testResult))\n\n"
         return outStr
 

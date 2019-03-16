@@ -50,7 +50,7 @@ class ExperimentInterpreter:
         self.generateTrainingFiles(experiment)
         self.generateDockerFiles(experiment)
         self.generateSlurmBatchFile(experiment)
-
+        os.system(experiment.executeFile)
 
     ## __generateExperimentObject__(self, expConfig)
     # Generates an experiment object given a experiment config
