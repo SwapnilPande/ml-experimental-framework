@@ -44,8 +44,21 @@
     [
         {
             "label" : "simple_deep_256",
-            "path" : "",
-            "preprocessor" : "preprocessors.deep_simple"
+            "train" : {
+                "generator" : "data_generators.deep_simple",
+                "args" : {
+                    "batch_size" : 32,
+                    "dataset" : "train"
+                }
+            },
+            "test" : {
+                "generator" : "data_generators.deep_simple",
+                "args" : {
+                    "batch_size" : 32,
+                    "dataset" : "test"
+                }
+            }
+
         }
     ],
     "optimizers" :

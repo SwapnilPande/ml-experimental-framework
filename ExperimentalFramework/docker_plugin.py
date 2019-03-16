@@ -6,7 +6,6 @@ class DockerPlugin:
 
     def __init__(self):
         # Define the mount directores for the data and experiment
-        self.datasetMountDir = "/data"
         self.artifactMountDir = "/artifacts"
         self.experimentMountDir = "/experiment"
 
@@ -52,11 +51,24 @@ class DockerPlugin:
             experimentDir = expDir,
             experimentMountDir = self.experimentMountDir
         )
-        if(instance.getDataset()["path"] != ""):
+
+        # Mount directories for train, validation, and test datasets if they exist
+        if("path" in instance.getDataset()["train"]):
             runArgs += " -v {datasetDir}:{datasetMountDir}".format(
-                datasetDir = instance.getDataset()["path"],
-                datasetMountDir = self.datasetMountDir
+                datasetDir = instance.dataset["train"]["path"],
+                datasetMountDir = instance.dataset["train"]["path"]
             )
+        if("validation" in instance.dataset and "path" in instance["validation"]):
+            runArgs += " -v {datasetDir}:{datasetMountDir}".format(
+                datasetDir = instance.dataset["validation"]["path"],
+                datasetMountDir = instance.dataset["validation"]["path"]
+            )
+        if("test" in instance.dataset and "path" in instance.getDataset()["test"]):
+            runArgs += " -v {datasetDir}:{datasetMountDir}".format(
+                datasetDir = instance.dataset["test"]["path"],
+                datasetMountDir = instance.dataset["test"]["path"]
+            )
+
         if(runtime != None):
             runArgs += " --runtime={runtime}".format(runtime = runtime)
 

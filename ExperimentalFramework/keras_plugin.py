@@ -8,6 +8,7 @@ class plugin:
         for key,value in argDict.items():
             argStr = str(key) + " = "
             if(type(value) is str):
+                # Add quotes to strings
                 argStr += "\"" + value + "\""
             else:
                 argStr += str(value)
@@ -21,7 +22,20 @@ class plugin:
         #Import the correct optimizer for this model
         outStr += "from keras.optimizers import %(type)s\n" % {"type" : expInstance.optimizer["type"]}
         outStr += "import " + expInstance.model["path"] + "\n"
-        outStr += "import " + expInstance.dataset["preprocessor"] + "\n\n"
+
+        # Import train data generator
+        outStr += "import " + expInstance.dataset["train"]["generator"] + " as train_generator\n"
+
+        # Import validation data generator
+        if("validation" in expInstance.dataset):
+            outStr += "import " + expInstance.dataset["validation"]["generator"] + " as validation_generator\n"
+
+        # Import test data generator
+        if("test" in expInstance.dataset):
+            outStr += "import " + expInstance.dataset["test"]["generator"] + " as test_generator\n"
+
+        outStr += "\n"
+
         return outStr
 
     def optimizer(self, expInstance):
@@ -34,8 +48,24 @@ class plugin:
         return outStr
 
     def preprocessor(self, expInstance):
+        # Initialize preprocessor objects
         outStr = "# Initialize pre-processor\n"
-        outStr += "preprocessor = %(preprocessor)s.getPreprocessor()\n\n" % { "preprocessor" : expInstance.dataset["preprocessor"]}
+        outStr += "trainDataGen = train_generator.getGenerator({args})\n".format(
+                preprocessor = expInstance.dataset["train"]["generator"],
+                args = self.formatArgs(expInstance.dataset["train"]["args"])
+            )
+        if("validation" in expInstance.dataset):
+            outStr += "validationDataGen = validation_generator.getGenerator({args})\n".format(
+                preprocessor = expInstance.dataset["validation"]["generator"],
+                args = self.formatArgs(expInstance.dataset["validation"]["args"])
+            )
+        if("test" in expInstance.dataset):
+            outStr += "testDataGen = test_generator.getGenerator({args})\n".format(
+                preprocessor = expInstance.dataset["test"]["generator"],
+                args = self.formatArgs(expInstance.dataset["test"]["args"])
+            )
+        outStr += "\n"
+
         return outStr
 
     def model(self, expInstance):
@@ -46,8 +76,18 @@ class plugin:
         return outStr
 
     def fitGenerator(self, expInstance):
-        outStr = "model.fit_generator(preprocessor, %(args)s)\n\n" % {"args" : self.formatArgs(expInstance.hyperparameters) }
+        if("validation" in expInstance.dataset):
+            outStr = "model.fit_generator(train_generator, validation_data = validation_generator,  {args})\n\n".format(args = self.formatArgs(expInstance.hyperparameters))
+        else:
+            outStr = "model.fit_generator(train_generator,  {args})\n\n".format(args = self.formatArgs(expInstance.hyperparameters))
+        return outStr
 
+    def evaluateGenerator(self, expInstance):
+        outStr = ""
+        if("test" in expInstance.dataset):
+            outStr += "# Test Model\n"
+            outStr += "testResult = model.evaluate_generator(test_generator)\n"
+            outStr += "print(\"Final Test Loss: \" + str(testResult))\n\n"
         return outStr
 
     def getRequirements(self):
@@ -69,6 +109,7 @@ class plugin:
                 f.write(self.preprocessor(instance))
                 f.write(self.model(instance))
                 f.write(self.fitGenerator(instance))
+                f.write(self.evaluateGenerator(instance))
 
             instance.trainfile = filename
         return experiment
