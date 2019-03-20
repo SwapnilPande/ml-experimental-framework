@@ -2,6 +2,9 @@ import os
 import Experiment
 
 class plugin:
+    def __init__(self):
+        self.defaultContainer = "/tensorflow/tensorflow:latest-gpu-py3"
+
     def formatArgs(self, argDict):
         argList = []
         # Convert dictionary of arguments into string of comma seperated arguments
@@ -102,6 +105,9 @@ class plugin:
         return ["keras"]
 
     def generateTrainingFiles(self, experiment):
+
+        experiment.frameworkContainer = self.defaultContainer
+
         for instance in experiment.expInstances:
             # Construct full filename and path for python training file
             filename = (os.path.join(instance.artifactDir,"train-{label}-{instanceIdx}.py")).format(

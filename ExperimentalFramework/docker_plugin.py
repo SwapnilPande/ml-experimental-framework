@@ -78,7 +78,7 @@ class DockerPlugin:
             instanceIdx = instance.instanceIdx,
             args = runArgs)
 
-    def generateDockerFiles(self, experiment, frameworkContainer):
+    def generateDockerFiles(self, experiment):
         for instance in experiment.expInstances:
             # Construct full filename and path for python training file
             dockerfileName = (os.path.join(instance.artifactDir, "Dockerfile")).format(
@@ -87,7 +87,7 @@ class DockerPlugin:
 
              # Open dockerfile
             with open(dockerfileName, "w+") as f:
-                f.write(self.fromContainer(frameworkContainer))
+                f.write(self.fromContainer(experiment.frameworkContainer))
                 f.write(self.installDependencies(["libsm6", "libxext6"]))
                 f.write(self.installPipRequirements(experiment.requirements))
                 f.write(self.pythonEnvironment())

@@ -14,15 +14,9 @@ class ExperimentInterpreter:
     # artifactDir - Directory in which to generate all of the experiment artifacts
     # mlFwk - The experimental framework being used for the experiments
     #           Currently, the Interpreter object stores the framework to avoid importing all of the framework plugins
-    def __init__(self, artifactDir, mlFwk):
+    def __init__(self, artifactDir):
         # Save the directory in which all of the artifacts for the experiments will be generated
         self.artifactDir = artifactDir
-
-        self.mlFwk = mlFwk
-        # Imports the necessary ML framework plugin as defined in config
-        self.pluginName = mlFwk + "_plugin"
-        self.mlFwkPluginImport = __import__(self.pluginName)
-        print("Debug - Machine Learning Framework : " + self.mlFwk)
 
         #Initialize the plugin object from the ML Framework file
         self.mlFwkPlugin = self.mlFwkPluginImport.plugin()
@@ -37,8 +31,15 @@ class ExperimentInterpreter:
     def executeExperiment(self, expDir, expConfigFile):
         expConfigFilepath = os.path.join(expDir, expConfigFile)
         # Open and read in JSON file as dictionary
+
         with open(expConfigFilepath) as f:
             expConfig = json.load(f) # Load JSON as dict
+
+        # Imports the necessary ML framework plugin as defined in config
+        self.mlFwk = expConfig["ml_framework"]
+        self.mlFwkPluginName = self.mlFwk + "_plugin"
+        self.mlFwkPluginImport = __import__(self.mlFwkPluginName)
+        print("Debug - Machine Learning Framework : " + self.mlFwk)
 
         # Create an experiment object based on the expConfig file
         experiment = self.__generateExperimentObject__(expDir, expConfig)

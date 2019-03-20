@@ -1,5 +1,8 @@
 {
     "ml_framework" : "keras",
+    "ml_framework_plugin_options" : {
+
+    },
     "label" : "simple_mnist_experiment",
     "experiment_type" : "static_simple",
     "pip_requirements" : ["keras"],

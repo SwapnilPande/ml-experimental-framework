@@ -102,6 +102,8 @@ class StaticExperiment():
         """
         self.expInstanceDir = artifactDir + "/instance_{instanceIdx}/"
         self.executeFile = None # Path to file to run entire experiment (populated by SLURM plugin)
+        self.frameworkContainer = None # Name of the docker container to pull associated with the ML experimental framework. This field is populated by the ML Framework plugin
+
 
         self.slurmConfig = slurmConfig
         self.models = models
